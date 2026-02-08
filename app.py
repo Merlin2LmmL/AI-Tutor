@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import bcrypt
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -13,19 +14,43 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# AI client: Groq (free tier) or OpenAI
-# Set GROQ_API_KEY for free tier (get key at https://console.groq.com)
-# Or set OPENAI_API_KEY to use OpenAI instead
+# AI: Groq (free tier) or OpenAI. Key can come from env, request body (api_key), or login (ALLOWED_USERS → env key).
 GROQ_BASE = "https://api.groq.com/openai/v1"
-GROQ_MODEL = "llama-3.1-8b-instant"  # 14,400 req/day free tier
+GROQ_MODEL = "llama-3.1-8b-instant"
 OPENAI_MODEL = "gpt-4o-mini"
 
-def get_ai_client():
+def get_ai_client(api_key=None):
+    """Return (OpenAI client, model). Prefer given api_key, then GROQ_API_KEY, then OPENAI_API_KEY."""
+    if api_key and api_key.strip():
+        return OpenAI(api_key=api_key.strip(), base_url=GROQ_BASE), GROQ_MODEL
     if os.getenv("GROQ_API_KEY"):
         return OpenAI(api_key=os.getenv("GROQ_API_KEY"), base_url=GROQ_BASE), GROQ_MODEL
     if os.getenv("OPENAI_API_KEY"):
         return OpenAI(api_key=os.getenv("OPENAI_API_KEY")), OPENAI_MODEL
     return None, None
+
+def get_allowed_users():
+    """Parse ALLOWED_USERS env: JSON array of {username, password_hash}. Passwords are bcrypt hashes."""
+    raw = os.getenv("ALLOWED_USERS")
+    if not raw or not raw.strip():
+        return []
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return []
+
+def verify_login(username, password):
+    """Return True if username/password match an entry in ALLOWED_USERS."""
+    users = get_allowed_users()
+    for u in users:
+        if (u.get("username") or u.get("user")) == username:
+            ph = u.get("password_hash") or u.get("passwordHash")
+            if ph and password:
+                try:
+                    return bcrypt.checkpw(password.encode("utf-8"), ph.encode("utf-8"))
+                except Exception:
+                    return False
+    return False
 
 # Store loaded exercises
 exercises = {}
@@ -84,21 +109,31 @@ def get_exercise(exercise_id):
 
 @app.route('/api/exercises/<exercise_id>/grade', methods=['POST'])
 def grade_exercise(exercise_id):
-    """Grade a student's answer using AI (Groq free tier or OpenAI)."""
+    """Grade a student's answer using AI. Auth: request body can send api_key, or username+password (uses server GROQ key)."""
     if exercise_id not in exercises:
         return jsonify({'error': 'Exercise not found'}), 404
-
-    client, model = get_ai_client()
-    if not client:
-        return jsonify({
-            'success': False,
-            'error': 'No AI API key configured. Set GROQ_API_KEY (free at console.groq.com) or OPENAI_API_KEY in .env'
-        }), 503
 
     data = request.get_json() or {}
     student_answer = (data.get('answer') or '').strip()
     if not student_answer:
         return jsonify({'error': 'No answer provided'}), 400
+
+    # Resolve which API key to use: (1) body api_key, (2) username+password → server key, (3) server env key
+    api_key = (data.get('api_key') or data.get('apiKey') or '').strip()
+    username = (data.get('username') or '').strip()
+    password = (data.get('password') or '')
+
+    if username and password:
+        if not verify_login(username, password):
+            return jsonify({'success': False, 'error': 'Invalid username or password'}), 401
+        api_key = None  # use server's key
+
+    client, model = get_ai_client(api_key)
+    if not client:
+        return jsonify({
+            'success': False,
+            'error': 'No API key. Enter your Groq API key below, or log in with a teacher account.'
+        }), 503
 
     ex = exercises[exercise_id]
     question = ex.get('question', '')
