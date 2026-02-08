@@ -30,7 +30,7 @@ def get_ai_client(api_key=None):
     return None, None
 
 def get_allowed_users():
-    """Parse ALLOWED_USERS env: JSON array of {username, password_hash}. Passwords are bcrypt hashes."""
+    """Parse ALLOWED_USERS env: JSON array of {username_hash, password_hash} or legacy {username, password_hash}."""
     raw = os.getenv("ALLOWED_USERS")
     if not raw or not raw.strip():
         return []
@@ -40,10 +40,17 @@ def get_allowed_users():
         return []
 
 def verify_login(username, password):
-    """Return True if username/password match an entry in ALLOWED_USERS."""
+    """Return True if username/password match an entry. Supports username_hash (SHA-256) or plain username."""
+    import hashlib
     users = get_allowed_users()
+    username_hash = hashlib.sha256(username.encode("utf-8")).hexdigest() if username else ""
     for u in users:
-        if (u.get("username") or u.get("user")) == username:
+        match = False
+        if u.get("username_hash"):
+            match = u.get("username_hash") == username_hash
+        else:
+            match = (u.get("username") or u.get("user")) == username
+        if match:
             ph = u.get("password_hash") or u.get("passwordHash")
             if ph and password:
                 try:
