@@ -1,0 +1,13 @@
+# Deploy backend from this repo: connect GitHub at render.com, then use this blueprint.
+# Set env vars in Render dashboard: GROQ_API_KEY and optionally ALLOWED_USERS.
+services:
+  - type: web
+    name: python-tutor-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ALLOWED_USERS
+        sync: false

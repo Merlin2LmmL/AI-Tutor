@@ -10,36 +10,65 @@ A simple web-based platform for teaching Python programming. Students can comple
 - 📦 Import exercises from JSON files
 - 🎯 Automatic pass/fail determination (70+ score = pass)
 
-## Quick Start — GitHub Pages + Backend (Groq)
+## Quick Start — Everything from this GitHub repo
 
-The **website** is the static site in **`docs/`** (hosted on GitHub Pages). **Grading** uses **Groq** and requires a small **backend** (this Flask app) deployed somewhere. Students either enter your **Groq API key** on the site or **log in** with a username/password you define (then the server uses your key).
+Both the **website** and the **backend** live in this repo. Deploy the backend from GitHub (e.g. Render), host the site on GitHub Pages, then set the backend URL once in the code. **Users either** enter their own Groq API key **or** log in with a username/password you created. **All logged-in users use your API key** (one key on the server); you can add as many students as you want by hashing their credentials and adding them to `ALLOWED_USERS`.
 
-### 1. Deploy the backend (Flask)
+### 1. Deploy the backend from this repo (e.g. Render)
 
-Deploy this repo’s Flask app to a host that supports Python (e.g. [Render](https://render.com), Railway, Fly.io):
+1. Push this repo to GitHub.
+2. Go to [Render](https://render.com) → **New** → **Web Service** → connect your GitHub repo.
+3. Render can use the **`render.yaml`** in this repo, or set manually: **Build**: `pip install -r requirements.txt`, **Start**: `gunicorn app:app`.
+4. In Render **Environment**: add **`GROQ_API_KEY`** (your key from [console.groq.com](https://console.groq.com)). Never commit the key.
+5. Optional — let students use your key by logging in: add **`ALLOWED_USERS`** (JSON array of hashed users). Generate one with:
+   ```bash
+   python hash_password.py myuser mypassword
+   ```
+   Copy the output into `ALLOWED_USERS` (e.g. `[{"username_hash":"...","password_hash":"..."}]`). Only hashes are stored.
+6. Note your backend URL (e.g. `https://python-tutor-xxx.onrender.com`).
 
-- Set **one** env var: **`GROQ_API_KEY`** = your Groq API key (get one at [console.groq.com](https://console.groq.com)). **Never commit this key**; set it only in the host’s environment.
-- Optional — allow students to use your key by logging in: set **`ALLOWED_USERS`** to a JSON array of `{"username":"...", "password_hash":"..."}`. Generate hashes with:
-  ```bash
-  python hash_password.py student1 theirpassword
-  ```
-  Then add that object to `ALLOWED_USERS` (e.g. one object per student). Passwords are stored as bcrypt hashes only.
+### 2. Host the site (GitHub Pages)
 
-Note your backend URL (e.g. `https://python-tutor-xxx.onrender.com`).
+1. In the repo: **Settings** → **Pages** → **Source**: Deploy from branch → **Branch**: main → **Folder**: /docs → Save.
+2. Site URL: `https://<username>.github.io/<repo-name>/`
 
-### 2. Deploy the site (GitHub Pages)
+### 3. Set the backend URL once in the repo
 
-1. Push the repo to GitHub.
-2. **Settings** → **Pages** → **Source**: Deploy from branch → **Branch**: main → **Folder**: /docs → Save.
-3. Site URL: `https://<username>.github.io/<repo-name>/`
+In **`docs/index.html`**, near the top of the `<script>` block, set:
 
-### 3. On the website
+```javascript
+const BACKEND_URL = 'https://your-backend.onrender.com';  // your real backend URL
+```
 
-- **Backend URL**: Enter the URL of your deployed backend (e.g. `https://python-tutor-xxx.onrender.com`).
-- **API key**: Optional. If you enter your Groq API key here, grading uses it (saved in the browser only).
-- **Or login**: Enter a username/password you added to `ALLOWED_USERS`; grading then uses the server’s `GROQ_API_KEY`.
+Commit and push. After that, **users never see or enter the backend URL**. They only:
 
-Code runs in the browser (Pyodide). Grading runs on your backend with Groq.
+- **Use their own key**: Paste a Groq API key (link to get one is on the site), or  
+- **Log in**: Enter a username/password **you** created for them → they use **your** Groq API key (no key needed on their side).
+
+---
+
+### Adding more students (future-proof)
+
+Only **one** API key lives on the server: **yours** (`GROQ_API_KEY`). Every user you add to `ALLOWED_USERS` and who logs in with that username/password will use that same key.
+
+To add a new student:
+
+1. On your machine, run:
+   ```bash
+   python hash_password.py NewStudentName theirpassword
+   ```
+2. Copy the printed JSON object (e.g. `{"username_hash":"...","password_hash":"..."}`).
+3. In Render → your Web Service → **Environment** → edit **`ALLOWED_USERS`**.
+4. It should be a JSON **array**. Add the new object to the array (comma between entries). Example with two students:
+   ```json
+   [
+     {"username_hash":"91a03364125862e76532c559c8cf191c328ea06fd098ecc3d2aa35adc7941148","password_hash":"$2b$12$U8fja8cmE..."},
+     {"username_hash":"a1b2c3...","password_hash":"$2b$12$..."}
+   ]
+   ```
+5. Save. Render will redeploy; the new student can log in with the username/password you used in step 1.
+
+You never store plain passwords; only hashed username + password. Each new student = one more object in `ALLOWED_USERS`.
 
 ### Adding exercises
 

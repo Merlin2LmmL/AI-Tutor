@@ -125,7 +125,7 @@ def grade_exercise(exercise_id):
     if not student_answer:
         return jsonify({'error': 'No answer provided'}), 400
 
-    # Resolve which API key to use: (1) body api_key, (2) username+password → server key, (3) server env key
+    # Resolve which API key to use: (1) body api_key (user's own), (2) username+password → server GROQ key for all logged-in students, (3) server env key
     api_key = (data.get('api_key') or data.get('apiKey') or '').strip()
     username = (data.get('username') or '').strip()
     password = (data.get('password') or '')
@@ -133,7 +133,7 @@ def grade_exercise(exercise_id):
     if username and password:
         if not verify_login(username, password):
             return jsonify({'success': False, 'error': 'Invalid username or password'}), 401
-        api_key = None  # use server's key
+        api_key = None  # all logged-in users (ALLOWED_USERS) use server's GROQ_API_KEY
 
     client, model = get_ai_client(api_key)
     if not client:

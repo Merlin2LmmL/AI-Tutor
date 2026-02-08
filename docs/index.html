@@ -72,6 +72,8 @@
         .auth-box input[type="password"] { width: 180px; }
         .auth-box .row { margin-bottom: 8px; }
         .auth-box .hint { font-size: 0.85em; color: #666; margin-top: 8px; }
+        .auth-box a { color: #1976d2; margin-left: 8px; }
+        .auth-divider { color: #666; font-size: 0.9em; margin: 8px 0; }
     </style>
 </head>
 <body>
@@ -82,23 +84,20 @@
         </div>
         <div class="content">
             <div class="auth-box">
-                <h3>🔑 Grading: Backend + API key or login</h3>
+                <h3>🔑 To get your answers graded, choose one:</h3>
                 <div class="row">
-                    <label>Backend URL</label>
-                    <input type="text" id="backendUrl" placeholder="https://your-app.onrender.com" />
+                    <label>Your API key</label>
+                    <input type="password" id="apiKey" placeholder="Paste your Groq API key (gsk_…)" autocomplete="off" />
+                    <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Get a free API key →</a>
                 </div>
+                <div class="row auth-divider">— or log in to use the teacher’s API —</div>
                 <div class="row">
-                    <label>API key (Groq)</label>
-                    <input type="password" id="apiKey" placeholder="gsk_… (optional)" autocomplete="off" />
-                    <span class="hint">Optional. If set, grading uses this key.</span>
+                    <label>Username</label>
+                    <input type="text" id="authUser" placeholder="Username" autocomplete="username" />
+                    <label>Password</label>
+                    <input type="password" id="authPass" placeholder="Password" autocomplete="current-password" />
                 </div>
-                <div class="row">
-                    <label>Or login</label>
-                    <input type="text" id="authUser" placeholder="Username" />
-                    <input type="password" id="authPass" placeholder="Password" autocomplete="off" />
-                    <span class="hint">Use teacher account to grade with server key.</span>
-                </div>
-                <div class="hint">Values are saved in this browser only (sessionStorage).</div>
+                <div class="hint">Saved in this browser only. You only need either an API key or login.</div>
             </div>
             <div class="exercise-selector">
                 <select id="exerciseSelect">
@@ -139,6 +138,9 @@
         </div>
     </div>
     <script>
+        // Set this to your backend URL when you deploy (e.g. Render). Same repo can host backend from GitHub.
+        const BACKEND_URL = '';  // e.g. 'https://python-tutor-xxx.onrender.com'
+
         let currentExerciseId = null;
         let currentExercise = null;
         let exercises = [];
@@ -151,7 +153,6 @@
                 const s = sessionStorage.getItem(STORAGE_KEY);
                 if (s) {
                     const o = JSON.parse(s);
-                    if (o.backendUrl) document.getElementById('backendUrl').value = o.backendUrl;
                     if (o.apiKey) document.getElementById('apiKey').value = o.apiKey;
                     if (o.username) document.getElementById('authUser').value = o.username;
                     if (o.password) document.getElementById('authPass').value = o.password;
@@ -160,7 +161,6 @@
         }
         function saveAuth() {
             const o = {
-                backendUrl: document.getElementById('backendUrl').value.trim(),
                 apiKey: document.getElementById('apiKey').value,
                 username: document.getElementById('authUser').value,
                 password: document.getElementById('authPass').value
@@ -168,7 +168,7 @@
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(o));
         }
         document.addEventListener('DOMContentLoaded', loadAuth);
-        ['backendUrl','apiKey','authUser','authPass'].forEach(id => {
+        ['apiKey','authUser','authPass'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', saveAuth);
         });
@@ -289,9 +289,9 @@
             if (!currentExerciseId || !currentExercise) { alert('Please select an exercise first.'); return; }
             const answer = getEditorContent().trim();
             if (!answer) { alert('Please provide an answer before submitting.'); return; }
-            const backendUrl = (document.getElementById('backendUrl').value || '').trim().replace(/\/$/, '');
+            const backendUrl = (BACKEND_URL || '').trim().replace(/\/$/, '');
             if (!backendUrl) {
-                alert('Enter the Backend URL (where your grading server is hosted, e.g. https://your-app.onrender.com).');
+                alert('Grading is not configured. The site owner needs to set BACKEND_URL in the code and deploy the backend.');
                 return;
             }
             saveAuth();
