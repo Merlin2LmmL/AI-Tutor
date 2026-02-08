@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Tutor - Exercise Platform</title>
+    <base href="./">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .content { padding: 30px; }
+        .exercise-selector { margin-bottom: 30px; }
+        .exercise-selector select { width: 100%; padding: 15px; font-size: 16px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; }
+        .exercise-selector select:focus { outline: none; border-color: #667eea; }
+        .exercise-section { display: none; }
+        .exercise-section.active { display: block; }
+        .question-box { background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid #667eea; }
+        .question-box h2 { color: #333; margin-bottom: 15px; font-size: 1.5em; }
+        .question-box p { color: #555; line-height: 1.6; font-size: 1.1em; }
+        .materials-box { background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
+        .materials-box h3 { color: #1976d2; margin-bottom: 15px; }
+        .materials-box ul { list-style: none; padding-left: 0; }
+        .materials-box li { padding: 10px; margin-bottom: 10px; background: white; border-radius: 5px; border-left: 3px solid #1976d2; }
+        .materials-box a { color: #1976d2; text-decoration: none; font-weight: 500; }
+        .materials-box a:hover { text-decoration: underline; }
+        .answer-section { margin-bottom: 25px; }
+        .answer-section label { display: block; font-weight: 600; margin-bottom: 10px; color: #333; font-size: 1.1em; }
+        .answer-section .editor-wrap { width: 100%; min-height: 220px; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .answer-section .editor-wrap:focus-within { border-color: #667eea; }
+        #codeEditor { width: 100%; min-height: 220px; font-size: 14px; }
+        .console-output { margin-top: 15px; padding: 15px; background: #1e1e1e; color: #d4d4d4; border-radius: 8px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; min-height: 80px; max-height: 200px; overflow-y: auto; }
+        .console-output.empty { color: #888; }
+        .console-output .stderr { color: #f48771; }
+        .button-group { display: flex; gap: 15px; margin-bottom: 25px; }
+        button { padding: 15px 30px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .btn-submit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; flex: 1; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-run { background: #2e7d32; color: white; }
+        .btn-run:hover { background: #1b5e20; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4); }
+        .btn-run:disabled, .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .result-box { display: none; padding: 25px; border-radius: 10px; margin-top: 25px; }
+        .result-box.show { display: block; }
+        .result-box.passed { background: #e8f5e9; border-left: 5px solid #4caf50; }
+        .result-box.failed { background: #ffebee; border-left: 5px solid #f44336; }
+        .result-box h3 { margin-bottom: 15px; font-size: 1.5em; }
+        .result-box.passed h3 { color: #2e7d32; }
+        .result-box.failed h3 { color: #c62828; }
+        .score { font-size: 2em; font-weight: bold; margin: 15px 0; }
+        .result-box.passed .score { color: #4caf50; }
+        .result-box.failed .score { color: #f44336; }
+        .feedback { margin-top: 15px; line-height: 1.6; color: #333; }
+        .suggestions { margin-top: 15px; padding: 15px; background: white; border-radius: 5px; border-left: 3px solid #ff9800; }
+        .suggestions h4 { color: #f57c00; margin-bottom: 10px; }
+        .loading { display: none; text-align: center; padding: 20px; }
+        .loading.show { display: block; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/theme-chrome.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ext-language_tools.js" charset="utf-8"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐍 Python Tutor</h1>
+            <p>Learn Python Programming - Complete Exercises and Get AI Feedback</p>
+        </div>
+        <div class="content">
+            <div class="exercise-selector">
+                <select id="exerciseSelect">
+                    <option value="">Select an exercise...</option>
+                </select>
+            </div>
+            <div id="exerciseContainer" class="exercise-section">
+                <div class="question-box">
+                    <h2>Question</h2>
+                    <p id="questionText"></p>
+                </div>
+                <div class="materials-box">
+                    <h3>📚 Learning Materials</h3>
+                    <ul id="materialsList"></ul>
+                </div>
+                <div class="answer-section">
+                    <label>Your Answer:</label>
+                    <div class="editor-wrap">
+                        <div id="codeEditor"></div>
+                    </div>
+                    <div class="console-output empty" id="consoleOutput">Console output will appear here after you run your code.</div>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn-run" id="runBtn" onclick="runCode()">▶ Run Code</button>
+                    <button class="btn-submit" id="submitBtn" onclick="submitAnswer()">Submit Answer</button>
+                </div>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Grading your answer...</p>
+                </div>
+                <div class="result-box" id="resultBox">
+                    <h3 id="resultTitle"></h3>
+                    <div class="score" id="score"></div>
+                    <div class="feedback" id="feedback"></div>
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentExerciseId = null;
+        let currentExercise = null;
+        let exercises = [];
+        let codeEditor = null;
+        let pyodideReady = null;
+
+        function getBase() {
+            const p = window.location.pathname;
+            if (p.endsWith('/')) return p;
+            if (p.endsWith('index.html')) return p.replace(/index\.html$/, '');
+            return p.replace(/\/[^/]*$/, '/') || '/';
+        }
+
+        function getEditorContent() { return codeEditor ? codeEditor.getValue() : ''; }
+        function setEditorContent(value) { if (codeEditor) codeEditor.setValue(value || '', -1); }
+
+        function initEditor() {
+            const el = document.getElementById('codeEditor');
+            if (!el || codeEditor) return;
+            codeEditor = ace.edit('codeEditor');
+            codeEditor.setTheme('ace/theme/chrome');
+            codeEditor.session.setMode('ace/mode/python');
+            codeEditor.setOptions({ fontSize: '14px', showPrintMargin: false, highlightActiveLine: true, enableBasicAutocompletion: true, enableSnippets: true, enableLiveAutocompletion: true, tabSize: 4, useSoftTabs: true });
+            codeEditor.session.setValue('# Write your Python code here\n', -1);
+        }
+
+        async function loadPyodide() {
+            if (pyodideReady) return pyodideReady;
+            pyodideReady = loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
+            await pyodideReady;
+            return pyodideReady;
+        }
+
+        async function runCode() {
+            const code = getEditorContent().trim();
+            if (!code) { updateConsole('', 'No code to run.', false); return; }
+            const runBtn = document.getElementById('runBtn');
+            const outEl = document.getElementById('consoleOutput');
+            runBtn.disabled = true;
+            outEl.classList.remove('empty');
+            outEl.textContent = 'Loading Python...';
+            let stdout = '', stderr = '';
+            try {
+                const pyodide = await loadPyodide();
+                outEl.textContent = 'Running...';
+                const chunks = [];
+                pyodide.setStdout({ write: (msg) => chunks.push(msg) });
+                pyodide.setStderr({ write: (msg) => chunks.push(msg) });
+                await pyodide.runPythonAsync(code);
+                stdout = chunks.join('');
+                updateConsole(stdout, '', true);
+            } catch (err) {
+                stderr = err.message || String(err);
+                updateConsole('', stderr, false);
+            } finally {
+                runBtn.disabled = false;
+            }
+        }
+
+        function updateConsole(stdout, stderr, success) {
+            const el = document.getElementById('consoleOutput');
+            el.classList.remove('empty');
+            el.innerHTML = '';
+            if (stdout) { const pre = document.createElement('pre'); pre.textContent = stdout; el.appendChild(pre); }
+            if (stderr) { const pre = document.createElement('pre'); pre.className = 'stderr'; pre.textContent = stderr; el.appendChild(pre); }
+            if (!stdout && !stderr) el.textContent = success ? '(no output)' : 'Error';
+        }
+
+        async function loadExercises() {
+            try {
+                const base = getBase();
+                const response = await fetch(base + 'exercises/manifest.json');
+                exercises = await response.json();
+                const select = document.getElementById('exerciseSelect');
+                select.innerHTML = '<option value="">Select an exercise...</option>';
+                exercises.forEach(ex => {
+                    const opt = document.createElement('option');
+                    opt.value = ex.id;
+                    opt.textContent = ex.title;
+                    select.appendChild(opt);
+                });
+            } catch (e) { console.error('Error loading exercises:', e); }
+        }
+
+        document.getElementById('exerciseSelect').addEventListener('change', async function(e) {
+            const exerciseId = e.target.value;
+            if (!exerciseId) { document.getElementById('exerciseContainer').classList.remove('active'); return; }
+            try {
+                const base = getBase();
+                const response = await fetch(base + 'exercises/' + exerciseId + '.json');
+                const exercise = await response.json();
+                currentExerciseId = exerciseId;
+                currentExercise = exercise;
+                document.getElementById('questionText').textContent = exercise.question || 'No question provided.';
+                const materialsList = document.getElementById('materialsList');
+                materialsList.innerHTML = '';
+                if (exercise.materials && exercise.materials.length > 0) {
+                    exercise.materials.forEach(m => {
+                        const li = document.createElement('li');
+                        if (m.type === 'link') {
+                            const a = document.createElement('a');
+                            a.href = m.content;
+                            a.target = '_blank';
+                            a.textContent = m.title || m.content;
+                            li.appendChild(a);
+                        } else li.textContent = m.content;
+                        materialsList.appendChild(li);
+                    });
+                } else materialsList.innerHTML = '<li>No additional materials provided.</li>';
+                setEditorContent('');
+                document.getElementById('resultBox').classList.remove('show', 'passed', 'failed');
+                document.getElementById('consoleOutput').textContent = 'Console output will appear here after you run your code.';
+                document.getElementById('consoleOutput').className = 'console-output empty';
+                document.getElementById('exerciseContainer').classList.add('active');
+                setTimeout(initEditor, 50);
+            } catch (err) { console.error(err); alert('Error loading exercise.'); }
+        });
+
+        async function submitAnswer() {
+            if (!currentExerciseId || !currentExercise) { alert('Please select an exercise first.'); return; }
+            const answer = getEditorContent().trim();
+            if (!answer) { alert('Please provide an answer before submitting.'); return; }
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const resultBox = document.getElementById('resultBox');
+            submitBtn.disabled = true;
+            loading.classList.add('show');
+            resultBox.classList.remove('show');
+            const question = currentExercise.question || '';
+            const gradingInstructions = currentExercise.grading_instructions || '';
+            const prompt = `You are a Python programming tutor grading a student's answer. Grade based ONLY on the code below.
+
+STUDENT'S CODE:
+---
+${answer}
+---
+
+EXERCISE QUESTION:
+${question}
+
+GRADING INSTRUCTIONS:
+${gradingInstructions}
+
+Respond with ONLY a valid JSON object, no other text:
+{"score": <number 0-100>, "passed": <true if score >= 70 and all requirements met>, "feedback": "<personalized feedback>", "suggestions": "<only what is actually missing or empty string>"}
+
+CRITICAL: If ANY requirement is not met, score MUST be at most 65 (FAIL). When all requirements are fully met, give 95-100. Use variables in output when the task says "print the variables" - not hardcoded literals.`;
+
+            try {
+                if (typeof puter === 'undefined' || !puter.ai || !puter.ai.chat) {
+                    alert('Puter AI is not loaded. Check your connection and refresh.');
+                    return;
+                }
+                const response = await puter.ai.chat(prompt, { model: 'gpt-5-nano' });
+                const rawText = (typeof response === 'string') ? response : (response?.message?.content ?? response?.content ?? response?.text ?? String(response));
+                let result;
+                try {
+                    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                    result = jsonMatch ? JSON.parse(jsonMatch[0]) : { score: 0, passed: false, feedback: rawText, suggestions: '' };
+                } catch (_) { result = { score: 0, passed: false, feedback: rawText || 'Could not parse response.', suggestions: '' }; }
+                const score = typeof result.score === 'number' ? result.score : 0;
+                const passed = (result.passed === true || result.passed === 'true') || score >= 70;
+                resultBox.classList.remove('passed', 'failed');
+                resultBox.classList.add('show', passed ? 'passed' : 'failed');
+                document.getElementById('resultTitle').textContent = passed ? '✅ Congratulations! You Passed!' : '❌ Not Quite There Yet';
+                document.getElementById('score').textContent = 'Score: ' + score + '/100';
+                document.getElementById('feedback').innerHTML = '<strong>Feedback:</strong><br>' + (result.feedback || '').replace(/\n/g, '<br>');
+                document.getElementById('suggestions').innerHTML = result.suggestions ? '<h4>💡 Suggestions for Improvement:</h4>' + (result.suggestions + '').replace(/\n/g, '<br>') : '';
+            } catch (err) {
+                console.error(err);
+                alert('Grading failed: ' + (err.message || err));
+            } finally {
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+            }
+        }
+
+        loadExercises();
+    </script>
+</body>
+</html>
