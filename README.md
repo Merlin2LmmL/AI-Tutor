@@ -4,11 +4,11 @@ A simple web-based platform for teaching Python programming. Students can comple
 
 ## Features
 
-- 📝 Simple HTML interface that students can open in any browser
-- 🤖 **AI grading** via the **Groq HTTP API** (called directly from the browser)
-- 📚 Support for learning materials (links and text)
-- 📦 Import exercises from JSON files
-- 🎯 Automatic pass/fail determination (70+ score = pass)
+- Simple HTML interface that students can open in any browser
+- **AI grading** via the **Groq HTTP API** (called directly from the browser)
+- Support for learning materials (links and text)
+- Import exercises from JSON files
+- Automatic pass/fail determination (70+ score = pass)
 
 ## Live site
 
