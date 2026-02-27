@@ -19,7 +19,9 @@
         .exercise-section.active { display: block; }
         .question-box { background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid #667eea; }
         .question-box h2 { color: #333; margin-bottom: 15px; font-size: 1.5em; }
-        .question-box p { color: #555; line-height: 1.6; font-size: 1.1em; }
+        .question-box p { color: #555; line-height: 1.6; font-size: 1.1em; margin-bottom: 8px; }
+        .question-list { margin-top: 6px; padding-left: 20px; }
+        .question-list li { margin-bottom: 6px; color: #555; line-height: 1.5; font-size: 1.02em; }
         .materials-box { background: #e3f2fd; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
         .materials-box h3 { color: #1976d2; margin-bottom: 15px; }
         .materials-box ul { list-style: none; padding-left: 0; }
@@ -58,6 +60,13 @@
         .loading.show { display: block; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .model-row { margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .model-row label { width: auto; font-weight: 600; }
+        .model-row select { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; }
+        .model-hint { font-size: 0.8em; color: #555; margin-top: 4px; }
+        .model-used { margin-top: 8px; font-size: 0.9em; color: #555; }
+        .import-row { margin-top: 10px; font-size: 0.9em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .import-row input[type="file"] { font-size: 0.9em; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/mode-python.js" charset="utf-8"></script>
@@ -67,13 +76,12 @@
     <style>
         .auth-box { background: #f0f4ff; padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #667eea; }
         .auth-box h3 { font-size: 1em; margin-bottom: 10px; color: #333; }
-        .auth-box label { display: inline-block; width: 100px; font-weight: 600; }
-        .auth-box input { padding: 8px 12px; margin: 4px 8px 4px 0; border-radius: 6px; border: 1px solid #ccc; width: 200px; }
-        .auth-box input[type="password"] { width: 180px; }
+        .auth-box label { display: inline-block; width: 120px; font-weight: 600; }
+        .auth-box input { padding: 8px 12px; margin: 4px 8px 4px 0; border-radius: 6px; border: 1px solid #ccc; width: 260px; }
+        .auth-box input[type="password"] { width: 260px; }
         .auth-box .row { margin-bottom: 8px; }
         .auth-box .hint { font-size: 0.85em; color: #666; margin-top: 8px; }
-        .auth-box a { color: #1976d2; margin-left: 8px; }
-        .auth-divider { color: #666; font-size: 0.9em; margin: 8px 0; }
+        .auth-box a { color: #1976d2; margin-left: 4px; }
     </style>
 </head>
 <body>
@@ -84,30 +92,39 @@
         </div>
         <div class="content">
             <div class="auth-box">
-                <h3>🔑 To get your answers graded, choose one:</h3>
+                <h3>🔑 To get your answers graded, enter your own Groq API key:</h3>
                 <div class="row">
                     <label>Your API key</label>
                     <input type="password" id="apiKey" placeholder="Paste your Groq API key (gsk_…)" autocomplete="off" />
                     <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Get a free API key →</a>
                 </div>
-                <div class="row auth-divider">— or log in to use the teacher’s API —</div>
-                <div class="row">
-                    <label>Username</label>
-                    <input type="text" id="authUser" placeholder="Username" autocomplete="username" />
-                    <label>Password</label>
-                    <input type="password" id="authPass" placeholder="Password" autocomplete="current-password" />
+                <div class="model-row">
+                    <label for="modelSelect">AI model</label>
+                    <select id="modelSelect">
+                        <option value="llama-3.3-70b-versatile" selected>llama-3.3-70b-versatile (70B, strong default)</option>
+                        <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (20B, moderate)</option>
+                        <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (120B, strongest)</option>
+                        <option value="llama-3.2-11b-vision-preview">llama-3.2-11b-vision-preview (11B, compact)</option>
+                    </select>
                 </div>
-                <div class="hint">Saved in this browser only. You only need either an API key or login.</div>
+                <div class="model-hint">Default is a strong 70B model; switch to 20B/11B for cheaper tests or 120B for the strictest, smartest grading.</div>
+                <div class="hint">Your key is stored only in this browser (session storage) and sent directly to the backend for grading.</div>
             </div>
             <div class="exercise-selector">
                 <select id="exerciseSelect">
                     <option value="">Select an exercise...</option>
                 </select>
+                <div class="import-row">
+                    <span><strong>Import exercise JSON:</strong></span>
+                    <input type="file" id="exerciseImport" accept="application/json" />
+                    <span>(added only in this browser session)</span>
+                </div>
             </div>
             <div id="exerciseContainer" class="exercise-section">
                 <div class="question-box">
                     <h2>Question</h2>
-                    <p id="questionText"></p>
+                    <p id="questionIntro"></p>
+                    <ul id="questionList" class="question-list"></ul>
                 </div>
                 <div class="materials-box">
                     <h3>📚 Learning Materials</h3>
@@ -133,51 +150,113 @@
                     <div class="score" id="score"></div>
                     <div class="feedback" id="feedback"></div>
                     <div class="suggestions" id="suggestions"></div>
+                    <div class="model-used" id="modelUsed"></div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        // Set this to your backend URL when you deploy (e.g. Render). Same repo can host backend from GitHub.
-        const BACKEND_URL = 'https://ai-tutor-14oy.onrender.com/';  // e.g. 'https://python-tutor-xxx.onrender.com'
-
         let currentExerciseId = null;
         let currentExercise = null;
         let exercises = [];
         let codeEditor = null;
         let pyodideReady = null;
+        let lastModelUsed = null;
 
-        const STORAGE_KEY = 'python_tutor_auth';
+        const STORAGE_KEY = 'python_tutor_api_key';
+        const MODEL_STORAGE_KEY = 'python_tutor_model';
         function loadAuth() {
             try {
                 const s = sessionStorage.getItem(STORAGE_KEY);
                 if (s) {
                     const o = JSON.parse(s);
                     if (o.apiKey) document.getElementById('apiKey').value = o.apiKey;
-                    if (o.username) document.getElementById('authUser').value = o.username;
-                    if (o.password) document.getElementById('authPass').value = o.password;
+                }
+                const m = sessionStorage.getItem(MODEL_STORAGE_KEY);
+                if (m) {
+                    const sel = document.getElementById('modelSelect');
+                    if (sel) sel.value = m;
                 }
             } catch (e) {}
         }
         function saveAuth() {
             const o = {
-                apiKey: document.getElementById('apiKey').value,
-                username: document.getElementById('authUser').value,
-                password: document.getElementById('authPass').value
+                apiKey: document.getElementById('apiKey').value
             };
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(o));
         }
         document.addEventListener('DOMContentLoaded', loadAuth);
-        ['apiKey','authUser','authPass'].forEach(id => {
+        ['apiKey'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', saveAuth);
         });
+        const modelSelectEl = document.getElementById('modelSelect');
+        if (modelSelectEl) {
+            modelSelectEl.addEventListener('change', () => {
+                sessionStorage.setItem(MODEL_STORAGE_KEY, modelSelectEl.value);
+            });
+        }
+
+        function getSelectedModel() {
+            const el = document.getElementById('modelSelect');
+            // Fallback default: a strong 70B model
+            return (el && el.value) ? el.value : 'llama-3.3-70b-versatile';
+        }
+
+        function setLastModelUsed(model) {
+            lastModelUsed = model;
+            const el = document.getElementById('modelUsed');
+            if (!el) return;
+            if (!model) {
+                el.textContent = '';
+                return;
+            }
+            el.textContent = 'Model used for this grading: ' + model;
+        }
 
         function getBase() {
             const p = window.location.pathname;
             if (p.endsWith('/')) return p;
             if (p.endsWith('index.html')) return p.replace(/index\.html$/, '');
             return p.replace(/\/[^/]*$/, '/') || '/';
+        }
+
+        function renderQuestion(rawQuestion) {
+            const introEl = document.getElementById('questionIntro');
+            const listEl = document.getElementById('questionList');
+            if (!introEl || !listEl) return;
+
+            introEl.textContent = '';
+            listEl.innerHTML = '';
+
+            if (!rawQuestion) {
+                introEl.textContent = 'No question provided.';
+                return;
+            }
+
+            const lines = String(rawQuestion)
+                .split('\n')
+                .map(l => l.trim());
+            const nonEmpty = lines.filter(l => l.length > 0);
+
+            if (nonEmpty.length === 0) {
+                introEl.textContent = 'No question provided.';
+                return;
+            }
+
+            // First non-empty line becomes the intro sentence.
+            introEl.textContent = nonEmpty[0];
+
+            // Remaining lines: try to turn leading "1. ", "2. " etc. into bullets.
+            const bulletRegex = /^\d+\.\s*(.*)$/;
+            nonEmpty.slice(1).forEach(line => {
+                const match = line.match(bulletRegex);
+                const text = match ? match[1] : line;
+                if (!text) return;
+                const li = document.createElement('li');
+                li.textContent = text;
+                listEl.appendChild(li);
+            });
         }
 
         function getEditorContent() { return codeEditor ? codeEditor.getValue() : ''; }
@@ -193,10 +272,11 @@
             codeEditor.session.setValue('# Write your Python code here\n', -1);
         }
 
-        async function loadPyodide() {
+        async function getPyodide() {
+            // Wrapper around the global loadPyodide() from the CDN script.
+            // We must NOT call ourselves recursively, so we use window.loadPyodide.
             if (pyodideReady) return pyodideReady;
-            pyodideReady = loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
-            await pyodideReady;
+            pyodideReady = window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
             return pyodideReady;
         }
 
@@ -208,19 +288,32 @@
             runBtn.disabled = true;
             outEl.classList.remove('empty');
             outEl.textContent = 'Loading Python...';
-            let stdout = '', stderr = '';
+
             try {
-                const pyodide = await loadPyodide();
+                const pyodide = await getPyodide();
                 outEl.textContent = 'Running...';
-                const chunks = [];
-                pyodide.setStdout({ write: (msg) => chunks.push(msg) });
-                pyodide.setStderr({ write: (msg) => chunks.push(msg) });
+
+                let stdout = '';
+                let stderr = '';
+
+                // Pyodide 0.24: use batched callback, not write(), and return nothing.
+                pyodide.setStdout({
+                    batched(data) {
+                        stdout += data;
+                    },
+                });
+                pyodide.setStderr({
+                    batched(data) {
+                        stderr += data;
+                    },
+                });
+
                 await pyodide.runPythonAsync(code);
-                stdout = chunks.join('');
-                updateConsole(stdout, '', true);
+                updateConsole(stdout, stderr, true);
             } catch (err) {
-                stderr = err.message || String(err);
-                updateConsole('', stderr, false);
+                const raw = err && err.message ? err.message : String(err);
+                const msg = simplifyPyodideError(raw);
+                updateConsole('', msg, false);
             } finally {
                 runBtn.disabled = false;
             }
@@ -233,6 +326,19 @@
             if (stdout) { const pre = document.createElement('pre'); pre.textContent = stdout; el.appendChild(pre); }
             if (stderr) { const pre = document.createElement('pre'); pre.className = 'stderr'; pre.textContent = stderr; el.appendChild(pre); }
             if (!stdout && !stderr) el.textContent = success ? '(no output)' : 'Error';
+        }
+
+        function simplifyPyodideError(raw) {
+            if (!raw) return '';
+            const lines = String(raw).split('\n');
+            // Show only the part that refers to the user's code (from File "<exec>" onwards)
+            let start = lines.findIndex(l => l.includes('File "<exec>"'));
+            if (start === -1) {
+                // Fallback: last 3 non-empty lines (usually the actual error + message)
+                const nonEmpty = lines.filter(l => l.trim());
+                return nonEmpty.slice(-3).join('\n');
+            }
+            return lines.slice(start).join('\n').trim();
         }
 
         async function loadExercises() {
@@ -251,16 +357,55 @@
             } catch (e) { console.error('Error loading exercises:', e); }
         }
 
+        async function importExerciseFromFile(file) {
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                const exerciseId = data.id;
+                if (!exerciseId) {
+                    alert('Imported JSON needs an "id" field.');
+                    return;
+                }
+                // Add to in-memory list
+                exercises.push({
+                    id: exerciseId,
+                    title: data.title || exerciseId,
+                    description: data.description || ''
+                });
+                // Add to existing select
+                const select = document.getElementById('exerciseSelect');
+                const opt = document.createElement('option');
+                opt.value = exerciseId;
+                opt.textContent = data.title || exerciseId;
+                select.appendChild(opt);
+                // Store full exercise object in a local map via a lightweight cache on window
+                window.__importedExercises = window.__importedExercises || {};
+                window.__importedExercises[exerciseId] = data;
+                // Auto-select the imported exercise
+                select.value = exerciseId;
+                select.dispatchEvent(new Event('change'));
+            } catch (e) {
+                console.error(e);
+                alert('Failed to import exercise JSON: ' + (e.message || e));
+            }
+        }
+
         document.getElementById('exerciseSelect').addEventListener('change', async function(e) {
             const exerciseId = e.target.value;
             if (!exerciseId) { document.getElementById('exerciseContainer').classList.remove('active'); return; }
             try {
-                const base = getBase();
-                const response = await fetch(base + 'exercises/' + exerciseId + '.json');
-                const exercise = await response.json();
+                let exercise;
+                if (window.__importedExercises && window.__importedExercises[exerciseId]) {
+                    exercise = window.__importedExercises[exerciseId];
+                } else {
+                    const base = getBase();
+                    const response = await fetch(base + 'exercises/' + exerciseId + '.json');
+                    exercise = await response.json();
+                }
                 currentExerciseId = exerciseId;
                 currentExercise = exercise;
-                document.getElementById('questionText').textContent = exercise.question || 'No question provided.';
+                renderQuestion(exercise.question || '');
                 const materialsList = document.getElementById('materialsList');
                 materialsList.innerHTML = '';
                 if (exercise.materials && exercise.materials.length > 0) {
@@ -285,15 +430,20 @@
             } catch (err) { console.error(err); alert('Error loading exercise.'); }
         });
 
+        const importInput = document.getElementById('exerciseImport');
+        if (importInput) {
+            importInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                importExerciseFromFile(file);
+                // reset so the same file can be chosen again if needed
+                e.target.value = '';
+            });
+        }
+
         async function submitAnswer() {
             if (!currentExerciseId || !currentExercise) { alert('Please select an exercise first.'); return; }
             const answer = getEditorContent().trim();
             if (!answer) { alert('Please provide an answer before submitting.'); return; }
-            const backendUrl = (BACKEND_URL || '').trim().replace(/\/$/, '');
-            if (!backendUrl) {
-                alert('Grading is not configured. The site owner needs to set BACKEND_URL in the code and deploy the backend.');
-                return;
-            }
             saveAuth();
             const submitBtn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
@@ -301,42 +451,122 @@
             submitBtn.disabled = true;
             loading.classList.add('show');
             resultBox.classList.remove('show');
-            const body = { answer: answer };
             const apiKey = (document.getElementById('apiKey').value || '').trim();
-            const username = (document.getElementById('authUser').value || '').trim();
-            const password = document.getElementById('authPass').value;
-            if (apiKey) body.api_key = apiKey;
-            else if (username && password) { body.username = username; body.password = password; }
+            if (!apiKey) {
+                alert('Please paste your Groq API key before submitting.');
+                submitBtn.disabled = false;
+                loading.classList.remove('show');
+                return;
+            }
+
+            // Build grading prompt (client-side) using the same structure as the original backend.
+            const question = currentExercise.question || '';
+            const gradingInstructions = currentExercise.grading_instructions || currentExercise.gradingInstructions || '';
+            const prompt =
+`You are a Python programming tutor grading a student's answer. Grade based ONLY on the code below. Apply general programming semantics to ANY exercise.
+
+STUDENT'S CODE:
+---
+${answer}
+---
+
+EXERCISE QUESTION:
+${question}
+
+GRADING INSTRUCTIONS:
+${gradingInstructions}
+
+---
+UNIVERSAL PRINCIPLE (apply to every exercise):
+When a requirement says to "print" or "use" variables with "descriptive labels", two things must be true:
+(1) The variable NAME must appear in the print (e.g. {name}, {age}, {height}) — not a literal like "Merlin" or 16.
+(2) "Descriptive label" means ANY surrounding text that gives context — e.g. "My name is", "I am", "years old", "stand", "m tall". The student does NOT need one specific phrase. All of these COUNT as descriptive and MET: print(f"My name is {name},"), print(f"I am {age} years old"), print(f"and I stand {height}m tall.").
+
+DO NOT claim "age" or "height" are "missing descriptive labels" when the code has print(f"I am {age} years old") or print(f"and I stand {height}m tall."). That is FALSE — those lines clearly have descriptive text. Only mark NOT MET when the variable is missing (literal used instead) or there is no context at all (e.g. just print(age)).
+---
+
+BEFORE GRADING:
+1. List which variables the exercise asks to create/use.
+2. For each, check: is that variable name actually used later (e.g. in print, in expressions), or did the student write literal values instead? If literals are used where the variable should be, mark that requirement NOT MET.
+3. Only then assign score and write feedback.
+
+RULES:
+- If variables are defined but output uses literals instead of those variables (e.g. print(f"My name is Merlin") instead of {name}), the requirement is NOT met. Score below 70.
+- If the code uses the variables ({name}, {age}, {height}) in print with ANY descriptive text (e.g. "I am {age} years old", "stand {height}m tall"), that requirement IS MET. Do NOT say it is missing or "not fully met".
+- Do NOT invent missing requirements. Do NOT say "age and height are missing descriptive labels" when the code has print(f"I am {age} years old") and print(f"and I stand {height}m tall") — that is incorrect. Only mark missing what is actually wrong.
+- Do not suggest adding something that is already there.
+
+SCORING (apply strictly — do not be lenient):
+- PERFECT (all requirements fully met, no issues): Give 95–100. Prefer 100 for clearly perfect code. Do NOT cap at 90.
+- ANY requirement missing or wrong: Score MUST be at most 65. Never give 70 or above when a requirement is not met. passed MUST be false.
+- One critical requirement missing (e.g. not using variables in output): 45–65 max.
+- Two or more requirements missing: 20–40 max.
+- Syntax errors: 0–20.
+So: missing requirement ⇒ score ≤ 65 ⇒ FAIL. Perfect code ⇒ score 95–100.
+
+FEEDBACK: Friendly, specific. For critical mistakes (e.g. literals instead of variables), say clearly that this is why they did not pass and what to fix.
+
+SUGGESTIONS: Only for what is actually missing. Empty string if all met.
+
+Respond with ONLY a valid JSON object:
+{"score": <number>, "passed": <true ONLY if score >= 70 AND all requirements met — if any requirement missing, passed MUST be false and score ≤ 65>, "feedback": "<personalized feedback>", "suggestions": "<only what is actually missing or empty string>"}`;
+
             try {
-                const response = await fetch(backendUrl + '/api/exercises/' + currentExerciseId + '/grade', {
+                const modelToUse = getSelectedModel();
+                setLastModelUsed(modelToUse);
+                const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiKey
+                    },
+                    body: JSON.stringify({
+                        model: modelToUse,
+                        temperature: 0.4,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: "You are a Python tutor who grades code accurately. You apply general programming semantics: e.g. if a task asks to 'print the variables', you check that the code actually uses those variable names in the print (e.g. {name}) — not hardcoded literal values. You are friendly and specific. You only mark requirements missing when they are actually missing. Always respond with valid JSON only."
+                            },
+                            { role: 'user', content: prompt }
+                        ]
+                    })
                 });
-                const result = await response.json();
-                if (response.status === 401) {
-                    alert(result.error || 'Invalid username or password.');
-                    return;
+
+                if (!groqResponse.ok) {
+                    const text = await groqResponse.text();
+                    throw new Error('Groq API error: ' + groqResponse.status + ' ' + text);
                 }
-                if (response.status === 503) {
-                    alert(result.error || 'No API key configured on server.');
-                    return;
+
+                const groqData = await groqResponse.json();
+                const choices = groqData.choices || [];
+                const content = (choices[0] && choices[0].message && choices[0].message.content) ? choices[0].message.content.trim() : '';
+
+                let result;
+                if (content) {
+                    const start = content.indexOf('{');
+                    const end = content.lastIndexOf('}') + 1;
+                    if (start >= 0 && end > start) {
+                        result = JSON.parse(content.slice(start, end));
+                    }
                 }
-                if (result.success) {
-                    const score = typeof result.score === 'number' ? result.score : 0;
-                    const passed = (result.passed === true || result.passed === 'true') || score >= 70;
-                    resultBox.classList.remove('passed', 'failed');
-                    resultBox.classList.add('show', passed ? 'passed' : 'failed');
-                    document.getElementById('resultTitle').textContent = passed ? '✅ Congratulations! You Passed!' : '❌ Not Quite There Yet';
-                    document.getElementById('score').textContent = 'Score: ' + score + '/100';
-                    document.getElementById('feedback').innerHTML = '<strong>Feedback:</strong><br>' + (result.feedback || '').replace(/\n/g, '<br>');
-                    document.getElementById('suggestions').innerHTML = result.suggestions ? '<h4>💡 Suggestions for Improvement:</h4>' + (result.suggestions + '').replace(/\n/g, '<br>') : '';
-                } else {
-                    alert(result.error || 'Grading failed.');
+                if (!result) {
+                    result = { score: 0, passed: false, feedback: content || 'No feedback.', suggestions: '' };
                 }
+
+                const score = typeof result.score === 'number' ? result.score : 0;
+                let passed = result.passed === true || result.passed === 'true' || score >= 70;
+                if (score < 70) passed = false; // enforce fail < 70
+
+                resultBox.classList.remove('passed', 'failed');
+                resultBox.classList.add('show', passed ? 'passed' : 'failed');
+                document.getElementById('resultTitle').textContent = passed ? '✅ Congratulations! You Passed!' : '❌ Not Quite There Yet';
+                document.getElementById('score').textContent = 'Score: ' + score + '/100';
+                document.getElementById('feedback').innerHTML = '<strong>Feedback:</strong><br>' + (result.feedback || '').replace(/\n/g, '<br>');
+                document.getElementById('suggestions').innerHTML = result.suggestions ? '<h4>💡 Suggestions for Improvement:</h4>' + (result.suggestions + '').replace(/\n/g, '<br>') : '';
             } catch (err) {
                 console.error(err);
-                alert('Grading failed: ' + (err.message || err) + '. Check Backend URL and CORS.');
+                alert('Grading failed: ' + (err.message || err));
             } finally {
                 submitBtn.disabled = false;
                 loading.classList.remove('show');

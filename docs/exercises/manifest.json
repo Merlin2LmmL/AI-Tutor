@@ -1,4 +1,7 @@
 [
   {"id": "exercise_1", "title": "Variables and Data Types", "description": "Learn about Python variables and basic data types"},
-  {"id": "exercise_2", "title": "Lists and Loops", "description": "Practice working with Python lists and for loops"}
+  {"id": "exercise_2", "title": "Lists and Loops", "description": "Practice working with Python lists and for loops"},
+  {"id": "exercise_3", "title": "If/Elif/Else and Comparisons", "description": "Use conditional logic to assign grades and pass/fail status"},
+  {"id": "exercise_4", "title": "Functions and Return Values", "description": "Write and call a function that calculates an average"},
+  {"id": "exercise_5", "title": "Dictionaries and Key-Value Loops", "description": "Build and loop over a small phone book dictionary"}
 ]
