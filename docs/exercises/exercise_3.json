@@ -1,0 +1,19 @@
+{
+  "id": "exercise_3",
+  "title": "If, Elif, Else and Comparisons",
+  "description": "Practice writing conditional logic with if/elif/else and comparison operators",
+  "question": "Write a Python program that:\n1. Creates a variable called 'score' and assigns it an integer between 0 and 100\n2. Uses if/elif/else to print a grade based on 'score':\n90-100: print \"Grade: A\"\n80-89: print \"Grade: B\"\n70-79: print \"Grade: C\"\n60-69: print \"Grade: D\"\nBelow 60: print \"Grade: F\"\n3. Prints a final message that clearly says whether the student passed or failed.\nPassing is C or better (score >= 70). For example: \"You passed!\" or \"You failed.\"",
+  "materials": [
+    {
+      "type": "link",
+      "title": "Python If...Else",
+      "content": "https://www.w3schools.com/python/python_conditions.asp"
+    },
+    {
+      "type": "text",
+      "content": "Remember to use if/elif/else (not many separate if statements) so that exactly one grade is printed for each score."
+    }
+  ],
+  "grading_instructions": "There are 4 REQUIRED requirements. Check each one systematically:\n\nREQUIREMENT 1: Variable 'score' must exist and be assigned an integer value between 0 and 100 (inclusive). You do NOT need to check every boundary exactly, but the intent should be clear (e.g. score = 85).\n\nREQUIREMENT 2: There must be a single if/elif/else chain that covers all possible score values (0-100) with these grade labels EXACTLY:\n- 90-100: \"Grade: A\"\n- 80-89: \"Grade: B\"\n- 70-79: \"Grade: C\"\n- 60-69: \"Grade: D\"\n- below 60: \"Grade: F\"\nThe ranges can be implemented with comparison operators (>=, <=, <, >) in any correct way that does not leave gaps or overlaps.\n\nREQUIREMENT 3: The program must print the grade for the current score. It is OK if it prints additional helpful text, but somewhere the output must clearly contain one of the exact strings: \"Grade: A\", \"Grade: B\", \"Grade: C\", \"Grade: D\", or \"Grade: F\".\n\nREQUIREMENT 4: The program must print a clear pass/fail message based on the score. Passing means score >= 70. Examples that COUNT as correct:\n- print(\"You passed!\") when score is 70 or more\n- print(\"You failed.\") when score is below 70\nThe exact wording can vary but the meaning must be unambiguous.\n\nSTRICT SCORING (follow exactly):\n- Code with syntax errors or that obviously does not run: 0-20 points (FAIL)\n- All 4 requirements met: 90-100 points (PASS)\n- 3 requirements met (1 missing or clearly wrong): MAXIMUM 60 points (FAIL - score < 70)\n- 2 requirements met: MAXIMUM 40 points (FAIL)\n- 1 requirement met: MAXIMUM 20 points (FAIL)\n- 0 requirements met: 0-10 points (FAIL)\n\nCRITICAL: Missing ANY requirement = automatic FAIL (score < 70). Do NOT give passing scores if requirements are missing.\n\nIMPORTANT:\n- Do NOT require input() from the user. It is acceptable (and recommended) for the student to hard-code 'score' to a test value.\n- Only suggest improvements for requirements that are ACTUALLY missing.\n- If the conditional logic has a small formatting/style issue but is logically correct and clearly matches the ranges above, treat the requirement as MET."
+}
+

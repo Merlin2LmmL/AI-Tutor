@@ -1,0 +1,19 @@
+{
+  "id": "exercise_4",
+  "title": "Writing and Calling Functions",
+  "description": "Practice defining functions, using parameters, returning values, and calling functions",
+  "question": "Write a Python program that:\n1. Defines a function called 'average' that takes a list of numbers as a parameter\n2. Inside the function, calculates and RETURNS (not prints) the average of the numbers in the list\n3. In the main part of the program, creates a list called 'scores' with at least 4 integer values\n4. Calls the 'average' function with 'scores' and stores the result in a variable called 'avg_score'\n5. Prints a message that says what the average score is, for example: \"The average score is 82.5\" (your exact numbers will differ)",
+  "materials": [
+    {
+      "type": "link",
+      "title": "Python Functions",
+      "content": "https://www.w3schools.com/python/python_functions.asp"
+    },
+    {
+      "type": "text",
+      "content": "Hint: To compute the average, you can use sum(scores) / len(scores). Make sure your function RETURNS the value using 'return', and that you actually call the function."
+    }
+  ],
+  "grading_instructions": "There are 5 REQUIRED requirements. Check each one systematically:\n\nREQUIREMENT 1: A function named 'average' must be defined with exactly ONE parameter (the list of numbers). It can be called anything (e.g. numbers, values, scores) but must clearly represent the list.\n\nREQUIREMENT 2: Inside the function, the code must correctly calculate the average of the list and RETURN the result using 'return'. Merely printing the result inside the function is NOT enough by itself; there must be a 'return' statement that gives back the numeric average.\n\nREQUIREMENT 3: In the main (top-level) part of the code (outside the function), there must be a list called 'scores' with at least 4 integer values.\n\nREQUIREMENT 4: The program must CALL the 'average' function with 'scores' as the argument, and store the returned result in a variable called 'avg_score'. For example: avg_score = average(scores).\n\nREQUIREMENT 5: The program must print a clear message that includes the average value. The exact wording can vary, but it must:\n- Mention that it is an average (e.g. \"average score\" or \"avg\"), and\n- Include the value of 'avg_score' (not a hardcoded number).\n\nSTRICT SCORING (follow exactly):\n- Code with syntax errors or that obviously does not run: 0-20 points (FAIL)\n- All 5 requirements met: 90-100 points (PASS)\n- 4 requirements met: MAXIMUM 60 points (FAIL - score < 70)\n- 3 requirements met: MAXIMUM 40 points (FAIL)\n- 2 requirements met: MAXIMUM 25 points (FAIL)\n- 1 requirement met: MAXIMUM 15 points (FAIL)\n- 0 requirements met: 0-10 points (FAIL)\n\nCRITICAL: Missing ANY requirement = automatic FAIL (score < 70). Do NOT give passing scores if requirements are missing.\n\nIMPORTANT:\n- Do NOT require the student to use input(). Hard-coded test data in the 'scores' list is fine.\n- The function can include simple error-handling (e.g. for empty lists), but that is optional and not required.\n- Only suggest improvements for requirements that are ACTUALLY missing."
+}
+

@@ -1,0 +1,19 @@
+{
+  "id": "exercise_5",
+  "title": "Dictionaries and Looping Over Key-Value Pairs",
+  "description": "Practice working with Python dictionaries and for loops over items()",
+  "question": "Write a Python program that:\n1. Creates a dictionary called 'phone_book' with at least 3 entries. The keys should be names (strings) and the values should be phone numbers (strings or integers).\n2. Uses a for loop to iterate over the dictionary using items() and prints each entry on its own line in a clear format, for example: \"Alice: 123456\".\n3. After the loop, prints how many contacts are in the phone_book using len(phone_book), with a descriptive message.",
+  "materials": [
+    {
+      "type": "link",
+      "title": "Python Dictionaries",
+      "content": "https://www.w3schools.com/python/python_dictionaries.asp"
+    },
+    {
+      "type": "text",
+      "content": "Hint: You can loop over key-value pairs using: for name, number in phone_book.items():"
+    }
+  ],
+  "grading_instructions": "There are 4 REQUIRED requirements. Check each one systematically:\n\nREQUIREMENT 1: A dictionary named 'phone_book' must exist, with at least 3 key-value pairs. Keys must be names (strings). Values must be phone numbers (strings or integers). Minor formatting differences (spaces, dashes) are fine.\n\nREQUIREMENT 2: The program must use a for loop that iterates over phone_book using its items (for example: for name, number in phone_book.items(): or an equivalent correct pattern). Looping only over keys and then manually indexing values is acceptable but less ideal. Treat that as MET if it clearly works.\n\nREQUIREMENT 3: Inside the loop, the program must print each contact on its own line in a clear \"name: number\" style format. The exact punctuation can vary, but both the name and the phone number must appear.\n\nREQUIREMENT 4: After the loop, the program must print the total number of contacts using len(phone_book) with a descriptive message. For example: \"Total contacts: 3\" or \"There are 3 contacts in the phone book\". The actual number must come from len(phone_book), not a hardcoded literal.\n\nSTRICT SCORING (follow exactly):\n- Code with syntax errors or that obviously does not run: 0-20 points (FAIL)\n- All 4 requirements met: 90-100 points (PASS)\n- 3 requirements met: MAXIMUM 60 points (FAIL - score < 70)\n- 2 requirements met: MAXIMUM 40 points (FAIL)\n- 1 requirement met: MAXIMUM 20 points (FAIL)\n- 0 requirements met: 0-10 points (FAIL)\n\nCRITICAL: Missing ANY requirement = automatic FAIL (score < 70). Do NOT give passing scores if requirements are missing.\n\nIMPORTANT:\n- Do NOT require user input; hard-coded example contacts are fine.\n- Small stylistic differences (e.g. using f-strings vs. concatenation) are acceptable.\n- Only suggest improvements for requirements that are ACTUALLY missing."
+}
+
